@@ -352,6 +352,9 @@ typedef struct cflash_flags {
 #define BOOTROM_API_CALLBACK_pads_bank0_clear_bits 7
 #define BOOTROM_API_CALLBACK_pads_bank0_write_masked 8
 #define BOOTROM_API_CALLBACK_pads_bank0_read 9
+#define BOOTROM_API_CALLBACK_reset_block_reg_mask 10
+#define BOOTROM_API_CALLBACK_unreset_block_reg_mask 11
+#define BOOTROM_API_CALLBACK_unreset_block_reg_mask_wait_blocking 12
 #endif
 
 #endif

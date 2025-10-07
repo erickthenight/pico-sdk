@@ -1194,6 +1194,39 @@ static inline int pads_bank0_read(uint gpio) {
 }
 #endif
 
+
+// PICO_CONFIG: PICO_ALLOW_NONSECURE_USB, Allow non-secure to access USB, type=bool, default=0, group=hardware_usb
+#ifndef PICO_ALLOW_NONSECURE_USB
+#define PICO_ALLOW_NONSECURE_USB 0
+#endif
+
+
+// PICO_CONFIG: PICO_ALLOW_NONSECURE_RESETS, Allow non-secure to access RESETS, type=bool, default=0, group=hardware_resets
+#ifndef PICO_ALLOW_NONSECURE_RESETS
+#define PICO_ALLOW_NONSECURE_RESETS 0
+#endif
+
+#if PICO_SECURE
+#include "hardware/regs/resets.h"
+
+// PICO_CONFIG: PICO_ALLOW_NONSECURE_RESETS_MASK, Mask of RESETS that can be accessed by non-secure, type=int, default=resets needed for other PICO_ALLOW_NONSECURE_* options, group=hardware_resets
+#ifndef PICO_ALLOW_NONSECURE_RESETS_MASK
+#define PICO_ALLOW_NONSECURE_RESETS_MASK (PICO_ALLOW_NONSECURE_USB ? RESETS_RESET_USBCTRL_BITS : 0)
+#endif
+#endif
+
+#if PICO_ALLOW_NONSECURE_RESETS && PICO_NONSECURE
+static inline int reset_block_reg_mask(io_rw_32 *reset, uint32_t mask) {
+    return rom_secure_call(reset, mask, 0, 0, BOOTROM_API_CALLBACK_reset_block_reg_mask);
+}
+static inline int unreset_block_reg_mask(io_rw_32 *reset, uint32_t mask) {
+    return rom_secure_call(reset, mask, 0, 0, BOOTROM_API_CALLBACK_unreset_block_reg_mask);
+}
+static inline int unreset_block_reg_mask_wait_blocking(io_rw_32 *reset, io_ro_32 *reset_done, uint32_t mask) {
+    return rom_secure_call(reset, reset_done, mask, 0, BOOTROM_API_CALLBACK_unreset_block_reg_mask_wait_blocking);
+}
+#endif
+
 #endif  // ifndef __riscv
 
 #define BOOT_TYPE_NORMAL     0

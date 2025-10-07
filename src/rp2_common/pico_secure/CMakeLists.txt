@@ -16,6 +16,8 @@ if (NOT TARGET pico_secure)
             ALLOW_NONSECURE_USER_IRQ
             ALLOW_NONSECURE_PIO
             ALLOW_NONSECURE_GPIO
+            ALLOW_NONSECURE_USB
+            ALLOW_NONSECURE_RESETS
         )
         set(oneValueArgs
             ASSIGN_NONSECURE_TIMER
@@ -32,6 +34,11 @@ if (NOT TARGET pico_secure)
         target_compile_definitions(${NONSECURE_TARGET} PRIVATE
             PICO_NONSECURE=1
         )
+
+        # Options that require resets
+        if ((NOT OPTS_ALLOW_NONSECURE_RESETS) AND OPTS_ALLOW_NONSECURE_USB)
+            set(OPTS_ALLOW_NONSECURE_RESETS 1)
+        endif()
     
         foreach(arg IN LISTS options)
             if (OPTS_${arg})

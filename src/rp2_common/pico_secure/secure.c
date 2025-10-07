@@ -168,6 +168,12 @@ void __weak runtime_init_nonsecure_accessctrl_and_irqs() {
 
         irq_assign_to_ns(IO_IRQ_BANK0_NS, true);
     #endif
+
+    #if PICO_ALLOW_NONSECURE_USB
+        accessctrl_hw->usbctrl |= 0xacce0000 | ACCESSCTRL_USBCTRL_NSP_BITS | ACCESSCTRL_USBCTRL_NSU_BITS;
+
+        irq_assign_to_ns(USBCTRL_IRQ, true);
+    #endif
 }
 #endif
 

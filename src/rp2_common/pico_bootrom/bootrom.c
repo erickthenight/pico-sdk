@@ -446,6 +446,7 @@ int pio_request_unused_pio_from_secure(void) {
 #if !PICO_RUNTIME_NO_INIT_BOOTROM_API_CALLBACK
 #include <stdio.h>
 #include "hardware/clocks.h"
+#include "hardware/resets.h"
 #include "hardware/structs/accessctrl.h"
 
 int rom_default_callback(uint32_t a, uint32_t b, uint32_t c, uint32_t d, uint32_t fn) {
@@ -454,7 +455,7 @@ int rom_default_callback(uint32_t a, uint32_t b, uint32_t c, uint32_t d, uint32_
         case BOOTROM_API_CALLBACK_stdio_out_chars: {
             stdio_put_string((char*)a, b, false, true);
             stdio_flush();
-            return 0;
+            return BOOTROM_OK;
         }
     #endif
     #if PICO_ALLOW_NONSECURE_RAND
@@ -510,6 +511,23 @@ int rom_default_callback(uint32_t a, uint32_t b, uint32_t c, uint32_t d, uint32_
         case BOOTROM_API_CALLBACK_clock_get_hz: {
             return clock_get_hz(a);
         }
+    #if PICO_ALLOW_NONSECURE_RESETS
+        case BOOTROM_API_CALLBACK_reset_block_reg_mask: {
+            if (b & ~PICO_ALLOW_NONSECURE_RESETS_MASK) return BOOTROM_ERROR_NOT_PERMITTED;
+            reset_block_reg_mask((volatile io_rw_32 *)a, b);
+            return BOOTROM_OK;
+        }
+        case BOOTROM_API_CALLBACK_unreset_block_reg_mask: {
+            if (b & ~PICO_ALLOW_NONSECURE_RESETS_MASK) return BOOTROM_ERROR_NOT_PERMITTED;
+            unreset_block_reg_mask((volatile io_rw_32 *)a, b);
+            return BOOTROM_OK;
+        }
+        case BOOTROM_API_CALLBACK_unreset_block_reg_mask_wait_blocking: {
+            if (c & ~PICO_ALLOW_NONSECURE_RESETS_MASK) return BOOTROM_ERROR_NOT_PERMITTED;
+            unreset_block_reg_mask_wait_blocking((volatile io_rw_32 *)a, (const volatile io_ro_32 *)b, c);
+            return BOOTROM_OK;
+        }
+    #endif
         default: {
             printf("%d is not a supported rom function\n", fn);
             return BOOTROM_ERROR_INVALID_ARG;
