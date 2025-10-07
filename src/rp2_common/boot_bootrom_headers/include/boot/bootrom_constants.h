@@ -348,6 +348,10 @@ typedef struct cflash_flags {
 #define BOOTROM_API_CALLBACK_user_irq_claim_unused_for_nonsecure 3
 #define BOOTROM_API_CALLBACK_clock_get_hz 4
 #define BOOTROM_API_CALLBACK_pio_claim_unused_pio_for_nonsecure 5
+#define BOOTROM_API_CALLBACK_pads_bank0_set_bits 6
+#define BOOTROM_API_CALLBACK_pads_bank0_clear_bits 7
+#define BOOTROM_API_CALLBACK_pads_bank0_write_masked 8
+#define BOOTROM_API_CALLBACK_pads_bank0_read 9
 #endif
 
 #endif

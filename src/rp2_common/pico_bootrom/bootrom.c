@@ -199,6 +199,8 @@ int rom_pick_ab_partition_during_update(uint32_t *workarea_base, uint32_t workar
 }
 
 #if PICO_SECURE || PICO_NONSECURE
+#include "hardware/structs/accessctrl.h"
+
 int __noinline rom_secure_call(uint a, uint b, uint c, uint d, uint func) {
     uint32_t secure_call = (uintptr_t)rom_func_lookup_inline(ROM_FUNC_SECURE_CALL);
     register uint32_t r0 asm("r0") = a;
@@ -316,7 +318,6 @@ int user_irq_request_unused_from_secure(int num_irqs) {
 #if PICO_ALLOW_NONSECURE_PIO
 #include "hardware/pio.h"
 #include "hardware/irq.h"
-#include "hardware/structs/accessctrl.h"
 
 #if PICO_SECURE
 static int pio_claim_unused_pio_for_nonsecure(void) {
@@ -369,9 +370,14 @@ int pio_request_unused_pio_from_secure(void) {
 #endif
 #endif // PICO_ALLOW_NONSECURE_PIO
 
+#if PICO_ADD_NONSECURE_PADS_HELPER
+#include "hardware/structs/pads_bank0.h"
+#endif // PICO_ADD_NONSECURE_PADS_HELPER
+
 #if !PICO_RUNTIME_NO_INIT_BOOTROM_API_CALLBACK
 #include <stdio.h>
 #include "hardware/clocks.h"
+#include "hardware/structs/accessctrl.h"
 
 int rom_default_callback(uint32_t a, uint32_t b, uint32_t c, uint32_t d, uint32_t fn) {
     switch (fn) {
@@ -400,6 +406,41 @@ int rom_default_callback(uint32_t a, uint32_t b, uint32_t c, uint32_t d, uint32_
     #if PICO_ALLOW_NONSECURE_PIO
         case BOOTROM_API_CALLBACK_pio_claim_unused_pio_for_nonsecure: {
             return pio_claim_unused_pio_for_nonsecure();
+        }
+    #endif
+    #if PICO_ADD_NONSECURE_PADS_HELPER
+        case BOOTROM_API_CALLBACK_pads_bank0_set_bits: {
+            if (accessctrl_hw->gpio_nsmask[a/32] & 1u << (a & 0x1fu)) {
+                hw_set_bits(&pads_bank0_hw->io[a], b);
+                return 0;
+            } else {
+                return BOOTROM_ERROR_NOT_PERMITTED;
+            }
+        }
+        case BOOTROM_API_CALLBACK_pads_bank0_clear_bits: {
+            if (accessctrl_hw->gpio_nsmask[a/32] & 1u << (a & 0x1fu)) {
+                hw_clear_bits(&pads_bank0_hw->io[a], b);
+                return 0;
+            } else {
+                return BOOTROM_ERROR_NOT_PERMITTED;
+            }
+            return 0;
+        }
+        case BOOTROM_API_CALLBACK_pads_bank0_write_masked: {
+            if (accessctrl_hw->gpio_nsmask[a/32] & 1u << (a & 0x1fu)) {
+                hw_write_masked(&pads_bank0_hw->io[a], b, c);
+                return 0;
+            } else {
+                return BOOTROM_ERROR_NOT_PERMITTED;
+            }
+            return 0;
+        }
+        case BOOTROM_API_CALLBACK_pads_bank0_read: {
+            if (accessctrl_hw->gpio_nsmask[a/32] & 1u << (a & 0x1fu)) {
+                return pads_bank0_hw->io[a];
+            } else {
+                return BOOTROM_ERROR_NOT_PERMITTED;
+            }
         }
     #endif
         case BOOTROM_API_CALLBACK_clock_get_hz: {

@@ -27,7 +27,7 @@ static raw_irq_mask_type_t raw_irq_mask[NUM_CORES];
 // Get the raw value from the pin, bypassing any muxing or overrides.
 int gpio_get_pad(uint gpio) {
     check_gpio_param(gpio);
-    hw_set_bits(&pads_bank0_hw->io[gpio], PADS_BANK0_GPIO0_IE_BITS);
+    pads_bank0_set_bits(gpio, PADS_BANK0_GPIO0_IE_BITS);
     return (io_bank0_hw->io[gpio].status & IO_BANK0_GPIO0_STATUS_INFROMPAD_BITS)
             >> IO_BANK0_GPIO0_STATUS_INFROMPAD_LSB;
 }
@@ -39,7 +39,7 @@ void gpio_set_function(uint gpio, gpio_function_t fn) {
     check_gpio_param(gpio);
     invalid_params_if(HARDWARE_GPIO, ((uint32_t)fn << IO_BANK0_GPIO0_CTRL_FUNCSEL_LSB) & ~IO_BANK0_GPIO0_CTRL_FUNCSEL_BITS);
     // Set input enable on, output disable off
-    hw_write_masked(&pads_bank0_hw->io[gpio],
+    pads_bank0_write_masked(gpio,
                    PADS_BANK0_GPIO0_IE_BITS,
                    PADS_BANK0_GPIO0_IE_BITS | PADS_BANK0_GPIO0_OD_BITS
     );
@@ -48,7 +48,7 @@ void gpio_set_function(uint gpio, gpio_function_t fn) {
     io_bank0_hw->io[gpio].ctrl = fn << IO_BANK0_GPIO0_CTRL_FUNCSEL_LSB;
 #if HAS_PADS_BANK0_ISOLATION
     // Remove pad isolation now that the correct peripheral is in control of the pad
-    hw_clear_bits(&pads_bank0_hw->io[gpio], PADS_BANK0_GPIO0_ISO_BITS);
+    pads_bank0_clear_bits(gpio, PADS_BANK0_GPIO0_ISO_BITS);
 #endif
 }
 /// \end::gpio_set_function[]
@@ -62,8 +62,8 @@ gpio_function_t gpio_get_function(uint gpio) {
 // i.e. weak pull to whatever is current high/low state of GPIO.
 void gpio_set_pulls(uint gpio, bool up, bool down) {
     check_gpio_param(gpio);
-    hw_write_masked(
-            &pads_bank0_hw->io[gpio],
+    pads_bank0_write_masked(
+            gpio,
             (bool_to_bit(up) << PADS_BANK0_GPIO0_PUE_LSB) | (bool_to_bit(down) << PADS_BANK0_GPIO0_PDE_LSB),
             PADS_BANK0_GPIO0_PUE_BITS | PADS_BANK0_GPIO0_PDE_BITS
     );
@@ -106,20 +106,20 @@ void gpio_set_oeover(uint gpio, uint value) {
 void gpio_set_input_hysteresis_enabled(uint gpio, bool enabled) {
     check_gpio_param(gpio);
     if (enabled)
-        hw_set_bits(&pads_bank0_hw->io[gpio], PADS_BANK0_GPIO0_SCHMITT_BITS);
+        pads_bank0_set_bits(gpio, PADS_BANK0_GPIO0_SCHMITT_BITS);
     else
-        hw_clear_bits(&pads_bank0_hw->io[gpio], PADS_BANK0_GPIO0_SCHMITT_BITS);
+        pads_bank0_clear_bits(gpio, PADS_BANK0_GPIO0_SCHMITT_BITS);
 }
 
 
 bool gpio_is_input_hysteresis_enabled(uint gpio) {
     check_gpio_param(gpio);
-    return (pads_bank0_hw->io[gpio] & PADS_BANK0_GPIO0_SCHMITT_BITS) != 0;
+    return (pads_bank0_read(gpio) & PADS_BANK0_GPIO0_SCHMITT_BITS) != 0;
 }
 
 void gpio_set_slew_rate(uint gpio, enum gpio_slew_rate slew) {
     check_gpio_param(gpio);
-    hw_write_masked(&pads_bank0_hw->io[gpio],
+    pads_bank0_write_masked(gpio,
                     (uint)slew << PADS_BANK0_GPIO0_SLEWFAST_LSB,
                     PADS_BANK0_GPIO0_SLEWFAST_BITS
     );
@@ -127,7 +127,7 @@ void gpio_set_slew_rate(uint gpio, enum gpio_slew_rate slew) {
 
 enum gpio_slew_rate gpio_get_slew_rate(uint gpio) {
     check_gpio_param(gpio);
-    return (enum gpio_slew_rate)((pads_bank0_hw->io[gpio]
+    return (enum gpio_slew_rate)((pads_bank0_read(gpio)
                                   & PADS_BANK0_GPIO0_SLEWFAST_BITS)
             >> PADS_BANK0_GPIO0_SLEWFAST_LSB);
 }
@@ -137,7 +137,7 @@ enum gpio_slew_rate gpio_get_slew_rate(uint gpio) {
 static_assert(PADS_BANK0_GPIO0_DRIVE_VALUE_8MA == GPIO_DRIVE_STRENGTH_8MA, "");
 void gpio_set_drive_strength(uint gpio, enum gpio_drive_strength drive) {
     check_gpio_param(gpio);
-    hw_write_masked(&pads_bank0_hw->io[gpio],
+    pads_bank0_write_masked(gpio,
                     (uint)drive << PADS_BANK0_GPIO0_DRIVE_LSB,
                     PADS_BANK0_GPIO0_DRIVE_BITS
     );
@@ -145,7 +145,7 @@ void gpio_set_drive_strength(uint gpio, enum gpio_drive_strength drive) {
 
 enum gpio_drive_strength gpio_get_drive_strength(uint gpio) {
     check_gpio_param(gpio);
-    return (enum gpio_drive_strength)((pads_bank0_hw->io[gpio]
+    return (enum gpio_drive_strength)((pads_bank0_read(gpio)
                                        & PADS_BANK0_GPIO0_DRIVE_BITS)
             >> PADS_BANK0_GPIO0_DRIVE_LSB);
 }
@@ -267,9 +267,9 @@ void gpio_debug_pins_init(void) {
 void gpio_set_input_enabled(uint gpio, bool enabled) {
     check_gpio_param(gpio);
     if (enabled)
-        hw_set_bits(&pads_bank0_hw->io[gpio], PADS_BANK0_GPIO0_IE_BITS);
+        pads_bank0_set_bits(gpio, PADS_BANK0_GPIO0_IE_BITS);
     else
-        hw_clear_bits(&pads_bank0_hw->io[gpio], PADS_BANK0_GPIO0_IE_BITS);
+        pads_bank0_clear_bits(gpio, PADS_BANK0_GPIO0_IE_BITS);
 }
 
 void gpio_init(uint gpio) {

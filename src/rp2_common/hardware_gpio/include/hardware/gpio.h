@@ -30,6 +30,15 @@
 #include "hardware/gpio_coproc.h"
 #endif
 
+#if PICO_NONSECURE
+#include "pico/bootrom.h" // uses helper functions due to Errata RP2350-E3
+#else
+#define pads_bank0_set_bits(gpio, bits) hw_set_bits(&pads_bank0_hw->io[gpio], bits)
+#define pads_bank0_clear_bits(gpio, bits) hw_clear_bits(&pads_bank0_hw->io[gpio], bits)
+#define pads_bank0_write_masked(gpio, bits, mask) hw_write_masked(&pads_bank0_hw->io[gpio], bits, mask)
+#define pads_bank0_read(gpio) pads_bank0_hw->io[gpio]
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -320,7 +329,7 @@ static inline void gpio_pull_up(uint gpio) {
  * \return true if the GPIO is pulled up
  */
 static inline bool gpio_is_pulled_up(uint gpio) {
-    return (pads_bank0_hw->io[gpio] & PADS_BANK0_GPIO0_PUE_BITS) != 0;
+    return (pads_bank0_read(gpio) & PADS_BANK0_GPIO0_PUE_BITS) != 0;
 }
 
 /*! \brief Set specified GPIO to be pulled down.
@@ -339,7 +348,7 @@ static inline void gpio_pull_down(uint gpio) {
  * \return true if the GPIO is pulled down
  */
 static inline bool gpio_is_pulled_down(uint gpio) {
-    return (pads_bank0_hw->io[gpio] & PADS_BANK0_GPIO0_PDE_BITS) != 0;
+    return (pads_bank0_read(gpio) & PADS_BANK0_GPIO0_PDE_BITS) != 0;
 }
 
 /*! \brief Disable pulls on specified GPIO
