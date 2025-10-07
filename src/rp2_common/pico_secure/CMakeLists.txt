@@ -31,17 +31,6 @@ if (NOT TARGET pico_secure)
     
         target_compile_definitions(${NONSECURE_TARGET} PRIVATE
             PICO_NONSECURE=1
-    
-            # These all require secure access
-            PICO_RUNTIME_SKIP_INIT_BOOTROM_RESET=1
-            PICO_RUNTIME_SKIP_INIT_PER_CORE_BOOTROM_RESET=1
-            PICO_RUNTIME_SKIP_INIT_EARLY_RESETS=1
-            PICO_RUNTIME_SKIP_INIT_BOOT_LOCKS_RESET=1
-            PICO_RUNTIME_SKIP_INIT_BOOTROM_LOCKING_ENABLE=1
-            PICO_RUNTIME_SKIP_INIT_POST_CLOCK_RESETS=1
-    
-            # This will have been done by secure anyway
-            PICO_RUNTIME_SKIP_INIT_USB_POWER_DOWN=1
         )
     
         foreach(arg IN LISTS options)

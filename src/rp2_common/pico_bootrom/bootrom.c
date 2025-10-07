@@ -564,10 +564,10 @@ void __weak runtime_init_nonsecure_claims() {
 PICO_RUNTIME_INIT_FUNC_RUNTIME(runtime_init_nonsecure_claims, PICO_RUNTIME_INIT_NONSECURE_CLAIMS);
 #endif
 
-#if PICO_NONSECURE && !PICO_RUNTIME_NO_INIT_CLOCKS
+#if !PICO_RUNTIME_NO_INIT_NONSECURE_CLOCKS
 #include "hardware/clocks.h"
 
-void runtime_init_clocks() { // override the default weak definition
+void __weak runtime_init_nonsecure_clocks() {
     // Set all clocks to the reported frequency from the secure side
     for (uint i = 0; i < CLK_COUNT; i++) {
         uint32_t hz = rom_secure_call(i, 0, 0, 0, BOOTROM_API_CALLBACK_clock_get_hz);
@@ -575,6 +575,11 @@ void runtime_init_clocks() { // override the default weak definition
     }
 }
 #endif
+
+#if !PICO_RUNTIME_SKIP_INIT_NONSECURE_CLOCKS
+PICO_RUNTIME_INIT_FUNC_RUNTIME(runtime_init_nonsecure_clocks, PICO_RUNTIME_INIT_NONSECURE_CLOCKS);
+#endif
+
 
 #endif // PICO_SECURE || PICO_NONSECURE
 
