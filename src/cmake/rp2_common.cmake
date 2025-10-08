@@ -110,6 +110,7 @@ if (NOT PICO_BARE_METAL)
 
     if (PICO_COMBINED_DOCS OR NOT PICO_RP2040)
         pico_add_subdirectory(rp2_common/pico_sha256)
+        pico_add_subdirectory(rp2_common/pico_secure)
     endif()
 
     pico_add_subdirectory(rp2_common/pico_stdio_semihosting)
@@ -118,7 +119,6 @@ if (NOT PICO_BARE_METAL)
 
     if (NOT PICO_RISCV)
          pico_add_subdirectory(rp2_common/cmsis)
-         pico_add_subdirectory(rp2_common/pico_secure)
     endif()
     pico_add_subdirectory(rp2_common/tinyusb)
     pico_add_subdirectory(rp2_common/pico_stdio_usb)
