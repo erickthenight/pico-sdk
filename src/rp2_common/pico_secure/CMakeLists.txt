@@ -6,6 +6,7 @@ if (NOT TARGET pico_secure)
             ${CMAKE_CURRENT_LIST_DIR}/secure.c)
 
     pico_mirrored_target_link_libraries(pico_secure INTERFACE
+            hardware_exception
             pico_bootrom)
 
 

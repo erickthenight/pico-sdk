@@ -46,6 +46,7 @@ void secure_sau_configure_region(uint region, uint32_t base, uint32_t limit, boo
 
 
 void secure_sau_set_enabled(bool enabled) {
+    uint32_t save = save_and_disable_interrupts();
     __dmb();
 
     if (enabled)
@@ -55,6 +56,7 @@ void secure_sau_set_enabled(bool enabled) {
 
     __dsb();
     __isb();
+    restore_interrupts_from_disabled(save);
 }
 
 
