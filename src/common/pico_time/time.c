@@ -112,6 +112,7 @@ alarm_pool_t *alarm_pool_create_on_timer(alarm_pool_timer_t *timer, uint hardwar
     alarm_pool_t *pool = (alarm_pool_t *) malloc(sizeof(alarm_pool_t));
     if (pool) {
         pool->entries = (alarm_pool_entry_t *) calloc(max_timers, sizeof(alarm_pool_entry_t));
+        if (!pool->entries) panic("Failed to allocate alarm pool entries");
         ta_hardware_alarm_claim(timer, hardware_alarm_num);
         alarm_pool_post_alloc_init(pool, timer, hardware_alarm_num, max_timers);
     }
@@ -122,6 +123,7 @@ alarm_pool_t *alarm_pool_create_on_timer_with_unused_hardware_alarm(alarm_pool_t
     alarm_pool_t *pool = (alarm_pool_t *) malloc(sizeof(alarm_pool_t));
     if (pool) {
         pool->entries = (alarm_pool_entry_t *) calloc(max_timers, sizeof(alarm_pool_entry_t));
+        if (!pool->entries) panic("Failed to allocate alarm pool entries");
         alarm_pool_post_alloc_init(pool, timer, (uint) ta_hardware_alarm_claim_unused(timer, true), max_timers);
     }
     return pool;
