@@ -342,19 +342,41 @@ typedef struct cflash_flags {
 #define CFLASH_OP_MAX                   _u(2)
 
 #ifndef __riscv
-#define BOOTROM_API_CALLBACK_stdio_out_chars 0
-#define BOOTROM_API_CALLBACK_get_rand_64 1
-#define BOOTROM_API_CALLBACK_dma_allocate_unused_channel_for_nonsecure 2
-#define BOOTROM_API_CALLBACK_user_irq_claim_unused_for_nonsecure 3
-#define BOOTROM_API_CALLBACK_clock_get_hz 4
-#define BOOTROM_API_CALLBACK_pio_claim_unused_pio_for_nonsecure 5
-#define BOOTROM_API_CALLBACK_pads_bank0_set_bits 6
-#define BOOTROM_API_CALLBACK_pads_bank0_clear_bits 7
-#define BOOTROM_API_CALLBACK_pads_bank0_write_masked 8
-#define BOOTROM_API_CALLBACK_pads_bank0_read 9
-#define BOOTROM_API_CALLBACK_reset_block_reg_mask 10
-#define BOOTROM_API_CALLBACK_unreset_block_reg_mask 11
-#define BOOTROM_API_CALLBACK_unreset_block_reg_mask_wait_blocking 12
+/*! \brief Return a well known secure call code based on four ASCII characters
+ * \ingroup pico_bootrom
+ *
+ * These codes are used to call well known secure functions from non-secure code.
+ *
+ * NOTE: ASCII characters are all < 0x80, so will always start with `0b0xxx`, as required by the rom_secure_call() documentation.
+ *
+ * \param c1 the first character
+ * \param c2 the second character
+ * \param c3 the third character
+ * \param c4 the fourth character
+ * \return the 'code' to use in rom_secure_call(), and handled by rom_default_callback()
+ */
+#define SECURE_CALL_WELL_KNOWN_CODE(c1, c2, c3, c4) ((c1) | ((c2) << 8) | ((c3) << 16) | ((c4) << 24))
+
+#define SECURE_CALL_stdio_out_chars                             SECURE_CALL_WELL_KNOWN_CODE('I', 'O', 'O', 'C')
+
+#define SECURE_CALL_get_rand_64                                 SECURE_CALL_WELL_KNOWN_CODE('R', 'D', '6', '4')
+
+#define SECURE_CALL_dma_allocate_unused_channel_for_nonsecure   SECURE_CALL_WELL_KNOWN_CODE('D', 'A', 'C', 'H')
+
+#define SECURE_CALL_user_irq_claim_unused_for_nonsecure         SECURE_CALL_WELL_KNOWN_CODE('U', 'I', 'R', 'Q')
+
+#define SECURE_CALL_clock_get_hz                                SECURE_CALL_WELL_KNOWN_CODE('C', 'K', 'G', 'H')
+
+#define SECURE_CALL_pio_claim_unused_pio_for_nonsecure          SECURE_CALL_WELL_KNOWN_CODE('P', 'I', 'O', 'C')
+
+#define SECURE_CALL_pads_bank0_set_bits                         SECURE_CALL_WELL_KNOWN_CODE('P', '0', 'S', 'B')
+#define SECURE_CALL_pads_bank0_clear_bits                       SECURE_CALL_WELL_KNOWN_CODE('P', '0', 'C', 'B')
+#define SECURE_CALL_pads_bank0_write_masked                     SECURE_CALL_WELL_KNOWN_CODE('P', '0', 'W', 'M')
+#define SECURE_CALL_pads_bank0_read                             SECURE_CALL_WELL_KNOWN_CODE('P', '0', 'R', 'D')
+
+#define SECURE_CALL_reset_block_reg_mask                        SECURE_CALL_WELL_KNOWN_CODE('R', 'T', 'R', 'M')
+#define SECURE_CALL_unreset_block_reg_mask                      SECURE_CALL_WELL_KNOWN_CODE('R', 'T', 'U', 'M')
+#define SECURE_CALL_unreset_block_reg_mask_wait_blocking        SECURE_CALL_WELL_KNOWN_CODE('R', 'T', 'U', 'W')
 #endif
 
 #endif

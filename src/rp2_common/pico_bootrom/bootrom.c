@@ -294,7 +294,7 @@ int __noinline rom_secure_call(uint a, uint b, uint c, uint d, uint func) {
 
 #if PICO_NONSECURE
 static void stdio_nonsecure_out_chars(const char *buf, int length) {
-    rom_secure_call((uint32_t)buf, length, 0, 0, BOOTROM_API_CALLBACK_stdio_out_chars);
+    rom_secure_call((uint32_t)buf, length, 0, 0, SECURE_CALL_stdio_out_chars);
 }
 
 int stdio_nonsecure_in_chars(char *buf, int length) {
@@ -332,7 +332,7 @@ PICO_RUNTIME_INIT_FUNC_RUNTIME(runtime_init_nonsecure_stdio, PICO_RUNTIME_INIT_N
 #if PICO_NONSECURE
 // override the weak definition
 uint64_t get_rand_64(void) {
-    return rom_secure_call(0, 0, 0, 0, BOOTROM_API_CALLBACK_get_rand_64);
+    return rom_secure_call(0, 0, 0, 0, SECURE_CALL_get_rand_64);
 }
 #endif
 #endif // PICO_ALLOW_NONSECURE_RAND
@@ -355,7 +355,7 @@ static int dma_allocate_unused_channel_for_nonsecure(void) {
 int dma_request_unused_channels_from_secure(int num_channels) {
     int i;
     for (i = 0; i < num_channels; i++) {
-        int chan = rom_secure_call(0, 0, 0, 0, BOOTROM_API_CALLBACK_dma_allocate_unused_channel_for_nonsecure);
+        int chan = rom_secure_call(0, 0, 0, 0, SECURE_CALL_dma_allocate_unused_channel_for_nonsecure);
         if (chan < 0) break;
         dma_channel_unclaim(chan);
     }
@@ -378,7 +378,7 @@ static int user_irq_claim_unused_for_nonsecure() {
 int user_irq_request_unused_from_secure(int num_irqs) {
     int i;
     for (i = 0; i < num_irqs; i++) {
-        int irq = rom_secure_call(0, 0, 0, 0, BOOTROM_API_CALLBACK_user_irq_claim_unused_for_nonsecure);
+        int irq = rom_secure_call(0, 0, 0, 0, SECURE_CALL_user_irq_claim_unused_for_nonsecure);
         if (irq < 0) break;
         user_irq_unclaim(irq);
     }
@@ -433,7 +433,7 @@ static int pio_claim_unused_pio_for_nonsecure(void) {
 }
 #elif PICO_NONSECURE
 int pio_request_unused_pio_from_secure(void) {
-    int pio = rom_secure_call(0, 0, 0, 0, BOOTROM_API_CALLBACK_pio_claim_unused_pio_for_nonsecure);
+    int pio = rom_secure_call(0, 0, 0, 0, SECURE_CALL_pio_claim_unused_pio_for_nonsecure);
     if (pio < 0) return pio;
     for (uint sm = 0; sm < NUM_PIO_STATE_MACHINES; sm++) {
         pio_sm_unclaim(pio_get_instance(pio), sm);
@@ -452,55 +452,55 @@ int pio_request_unused_pio_from_secure(void) {
 int rom_default_callback(uint32_t a, uint32_t b, uint32_t c, uint32_t d, uint32_t fn) {
     switch (fn) {
     #if PICO_ALLOW_NONSECURE_STDIO
-        case BOOTROM_API_CALLBACK_stdio_out_chars: {
+        case SECURE_CALL_stdio_out_chars: {
             stdio_put_string((char*)a, b, false, true);
             stdio_flush();
             return BOOTROM_OK;
         }
     #endif
     #if PICO_ALLOW_NONSECURE_RAND
-        case BOOTROM_API_CALLBACK_get_rand_64: {
+        case SECURE_CALL_get_rand_64: {
             return get_rand_64();
         }
     #endif
     #if PICO_ALLOW_NONSECURE_DMA
-        case BOOTROM_API_CALLBACK_dma_allocate_unused_channel_for_nonsecure: {
+        case SECURE_CALL_dma_allocate_unused_channel_for_nonsecure: {
             return dma_allocate_unused_channel_for_nonsecure();
         }
     #endif
     #if PICO_ALLOW_NONSECURE_USER_IRQ
-        case BOOTROM_API_CALLBACK_user_irq_claim_unused_for_nonsecure: {
+        case SECURE_CALL_user_irq_claim_unused_for_nonsecure: {
             return user_irq_claim_unused_for_nonsecure();
         }
     #endif
     #if PICO_ALLOW_NONSECURE_PIO
-        case BOOTROM_API_CALLBACK_pio_claim_unused_pio_for_nonsecure: {
+        case SECURE_CALL_pio_claim_unused_pio_for_nonsecure: {
             return pio_claim_unused_pio_for_nonsecure();
         }
     #endif
     #if PICO_ADD_NONSECURE_PADS_HELPER
-        case BOOTROM_API_CALLBACK_pads_bank0_set_bits: {
+        case SECURE_CALL_pads_bank0_set_bits: {
             if (accessctrl_hw->gpio_nsmask[a/32] & 1u << (a & 0x1fu)) {
                 return pads_bank0_set_bits(a, b);
             } else {
                 return BOOTROM_ERROR_NOT_PERMITTED;
             }
         }
-        case BOOTROM_API_CALLBACK_pads_bank0_clear_bits: {
+        case SECURE_CALL_pads_bank0_clear_bits: {
             if (accessctrl_hw->gpio_nsmask[a/32] & 1u << (a & 0x1fu)) {
                 return pads_bank0_clear_bits(a, b);
             } else {
                 return BOOTROM_ERROR_NOT_PERMITTED;
             }
         }
-        case BOOTROM_API_CALLBACK_pads_bank0_write_masked: {
+        case SECURE_CALL_pads_bank0_write_masked: {
             if (accessctrl_hw->gpio_nsmask[a/32] & 1u << (a & 0x1fu)) {
                 return pads_bank0_write_masked(a, b, c);
             } else {
                 return BOOTROM_ERROR_NOT_PERMITTED;
             }
         }
-        case BOOTROM_API_CALLBACK_pads_bank0_read: {
+        case SECURE_CALL_pads_bank0_read: {
             if (accessctrl_hw->gpio_nsmask[a/32] & 1u << (a & 0x1fu)) {
                 return pads_bank0_read(a);
             } else {
@@ -508,21 +508,21 @@ int rom_default_callback(uint32_t a, uint32_t b, uint32_t c, uint32_t d, uint32_
             }
         }
     #endif
-        case BOOTROM_API_CALLBACK_clock_get_hz: {
+        case SECURE_CALL_clock_get_hz: {
             return clock_get_hz(a);
         }
     #if PICO_ALLOW_NONSECURE_RESETS
-        case BOOTROM_API_CALLBACK_reset_block_reg_mask: {
+        case SECURE_CALL_reset_block_reg_mask: {
             if (b & ~PICO_ALLOW_NONSECURE_RESETS_MASK) return BOOTROM_ERROR_NOT_PERMITTED;
             reset_block_reg_mask((volatile io_rw_32 *)a, b);
             return BOOTROM_OK;
         }
-        case BOOTROM_API_CALLBACK_unreset_block_reg_mask: {
+        case SECURE_CALL_unreset_block_reg_mask: {
             if (b & ~PICO_ALLOW_NONSECURE_RESETS_MASK) return BOOTROM_ERROR_NOT_PERMITTED;
             unreset_block_reg_mask((volatile io_rw_32 *)a, b);
             return BOOTROM_OK;
         }
-        case BOOTROM_API_CALLBACK_unreset_block_reg_mask_wait_blocking: {
+        case SECURE_CALL_unreset_block_reg_mask_wait_blocking: {
             if (c & ~PICO_ALLOW_NONSECURE_RESETS_MASK) return BOOTROM_ERROR_NOT_PERMITTED;
             unreset_block_reg_mask_wait_blocking((volatile io_rw_32 *)a, (const volatile io_ro_32 *)b, c);
             return BOOTROM_OK;
@@ -588,7 +588,7 @@ PICO_RUNTIME_INIT_FUNC_RUNTIME(runtime_init_nonsecure_claims, PICO_RUNTIME_INIT_
 void __weak runtime_init_nonsecure_clocks() {
     // Set all clocks to the reported frequency from the secure side
     for (uint i = 0; i < CLK_COUNT; i++) {
-        uint32_t hz = rom_secure_call(i, 0, 0, 0, BOOTROM_API_CALLBACK_clock_get_hz);
+        uint32_t hz = rom_secure_call(i, 0, 0, 0, SECURE_CALL_clock_get_hz);
         clock_set_reported_hz(i, hz);
     }
 }

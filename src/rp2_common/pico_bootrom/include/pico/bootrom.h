@@ -1134,7 +1134,7 @@ int pio_request_unused_pio_from_secure(void);
  */
 #if PICO_ADD_NONSECURE_PADS_HELPER && PICO_NONSECURE
 static inline int pads_bank0_set_bits(uint gpio, uint bits) {
-    return rom_secure_call(gpio, bits, 0, 0, BOOTROM_API_CALLBACK_pads_bank0_set_bits);
+    return rom_secure_call(gpio, bits, 0, 0, SECURE_CALL_pads_bank0_set_bits);
 }
 #else
 static inline int pads_bank0_set_bits(uint gpio, uint bits) {
@@ -1151,7 +1151,7 @@ static inline int pads_bank0_set_bits(uint gpio, uint bits) {
  */
 #if PICO_ADD_NONSECURE_PADS_HELPER && PICO_NONSECURE
 static inline int pads_bank0_clear_bits(uint gpio, uint bits) {
-    return rom_secure_call(gpio, bits, 0, 0, BOOTROM_API_CALLBACK_pads_bank0_clear_bits);
+    return rom_secure_call(gpio, bits, 0, 0, SECURE_CALL_pads_bank0_clear_bits);
 }
 #else
 static inline int pads_bank0_clear_bits(uint gpio, uint bits) {
@@ -1169,7 +1169,7 @@ static inline int pads_bank0_clear_bits(uint gpio, uint bits) {
  */
 #if PICO_ADD_NONSECURE_PADS_HELPER && PICO_NONSECURE
 static inline int pads_bank0_write_masked(uint gpio, uint bits, uint mask) {
-    return rom_secure_call(gpio, bits, mask, 0, BOOTROM_API_CALLBACK_pads_bank0_write_masked);
+    return rom_secure_call(gpio, bits, mask, 0, SECURE_CALL_pads_bank0_write_masked);
 }
 #else
 static inline int pads_bank0_write_masked(uint gpio, uint bits, uint mask) {
@@ -1186,7 +1186,7 @@ static inline int pads_bank0_write_masked(uint gpio, uint bits, uint mask) {
  */
 #if PICO_ADD_NONSECURE_PADS_HELPER && PICO_NONSECURE
 static inline int pads_bank0_read(uint gpio) {
-    return rom_secure_call(gpio, 0, 0, 0, BOOTROM_API_CALLBACK_pads_bank0_read);
+    return rom_secure_call(gpio, 0, 0, 0, SECURE_CALL_pads_bank0_read);
 }
 #else
 static inline int pads_bank0_read(uint gpio) {
@@ -1217,13 +1217,13 @@ static inline int pads_bank0_read(uint gpio) {
 
 #if PICO_ALLOW_NONSECURE_RESETS && PICO_NONSECURE
 static inline int reset_block_reg_mask(io_rw_32 *reset, uint32_t mask) {
-    return rom_secure_call(reset, mask, 0, 0, BOOTROM_API_CALLBACK_reset_block_reg_mask);
+    return rom_secure_call(reset, mask, 0, 0, SECURE_CALL_reset_block_reg_mask);
 }
 static inline int unreset_block_reg_mask(io_rw_32 *reset, uint32_t mask) {
-    return rom_secure_call(reset, mask, 0, 0, BOOTROM_API_CALLBACK_unreset_block_reg_mask);
+    return rom_secure_call(reset, mask, 0, 0, SECURE_CALL_unreset_block_reg_mask);
 }
 static inline int unreset_block_reg_mask_wait_blocking(io_rw_32 *reset, io_ro_32 *reset_done, uint32_t mask) {
-    return rom_secure_call(reset, reset_done, mask, 0, BOOTROM_API_CALLBACK_unreset_block_reg_mask_wait_blocking);
+    return rom_secure_call(reset, reset_done, mask, 0, SECURE_CALL_unreset_block_reg_mask_wait_blocking);
 }
 #endif
 
