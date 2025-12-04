@@ -95,6 +95,7 @@ if (NOT TARGET pico_secure)
 
             message("SECURE_LENGTH ${SECURE_LENGTH} SECURE_SCRATCH_LENGTH ${SECURE_SCRATCH_LENGTH}")
 
+            pico_set_linker_script_var(${SECURE_TARGET} RAM_ORIGIN "RAM_ORIGIN_DEFAULT")
             pico_set_linker_script_var(${SECURE_TARGET} RAM_LENGTH "${SECURE_LENGTH}-(${SECURE_SCRATCH_LENGTH}*2)")
             pico_set_linker_script_var(${SECURE_TARGET} SCRATCH_X_ORIGIN "RAM_ORIGIN+RAM_LENGTH")
             pico_set_linker_script_var(${SECURE_TARGET} SCRATCH_X_LENGTH ${SECURE_SCRATCH_LENGTH})

@@ -65,8 +65,9 @@ void secure_sau_configure_split() {
 #if defined(PICO_SECURITY_SPLIT_SIMPLE)
     // XIP is NS Code
     secure_sau_configure_region(0, XIP_BASE, XIP_END, true, false);
-    // SRAM after secure code is NS data
-    secure_sau_configure_region(1, SRAM_BASE + PICO_SECURITY_SPLIT_SIMPLE_SECURE_LENGTH, SRAM_END, true, false);
+    // SRAM after secure stack is NS data
+    extern uint32_t __StackTop;
+    secure_sau_configure_region(1, (uint32_t)&__StackTop, SRAM_END, true, false);
 #endif
 }
 #endif
