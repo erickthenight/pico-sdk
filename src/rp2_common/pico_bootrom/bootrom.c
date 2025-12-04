@@ -289,6 +289,46 @@ int __noinline rom_secure_call(uint a, uint b, uint c, uint d, uint func) {
     return (int)r0;
 }
 
+struct rom_secure_call_user_callback_slot {
+    uint16_t fn_mask;
+    rom_secure_call_callback_t callback;
+} rom_secure_call_user_callback_slots[PICO_MAX_SECURE_CALL_USER_CALLBACKS];
+
+int rom_secure_call_add_user_callback(rom_secure_call_callback_t callback, uint16_t fn_mask) {
+    int first_unused = PICO_MAX_SECURE_CALL_USER_CALLBACKS;
+    for (int i=0; i < PICO_MAX_SECURE_CALL_USER_CALLBACKS; i++) {
+        if (!rom_secure_call_user_callback_slots[i].fn_mask) {
+            if (first_unused == PICO_MAX_SECURE_CALL_USER_CALLBACKS) first_unused = i;
+            continue;
+        }
+
+        // Check new function is not an existing function mask
+        if (rom_secure_call_user_callback_slots[i].fn_mask == fn_mask) {
+            return BOOTROM_ERROR_INVALID_ARG;
+        }
+    }
+
+    if (first_unused == PICO_MAX_SECURE_CALL_USER_CALLBACKS) {
+        // No free slots
+        return BOOTROM_ERROR_BUFFER_TOO_SMALL;
+    }
+
+    rom_secure_call_user_callback_slots[first_unused].callback = callback;
+    rom_secure_call_user_callback_slots[first_unused].fn_mask = fn_mask;
+
+    return BOOTROM_OK;
+}
+
+void rom_secure_call_remove_user_callback(rom_secure_call_callback_t callback) {
+    for (int i=0; i < PICO_MAX_SECURE_CALL_USER_CALLBACKS; i++) {
+        if (rom_secure_call_user_callback_slots[i].callback == callback) {
+            rom_secure_call_user_callback_slots[i].callback = NULL;
+            rom_secure_call_user_callback_slots[i].fn_mask = 0;
+            return;
+        }
+    }
+}
+
 #if PICO_ALLOW_NONSECURE_STDIO
 #include "pico/stdio/driver.h"
 
@@ -450,6 +490,17 @@ int pio_request_unused_pio_from_secure(void) {
 #include "hardware/structs/accessctrl.h"
 
 int rom_default_callback(uint32_t a, uint32_t b, uint32_t c, uint32_t d, uint32_t fn) {
+    if (fn >> 31) {
+        // User callbacks all start with 0b1xxx, as specified by the rom_secure_call() documentation
+        for (int i=0; i < PICO_MAX_SECURE_CALL_USER_CALLBACKS; i++) {
+            if ((fn >> 16) == rom_secure_call_user_callback_slots[i].fn_mask) {
+                return rom_secure_call_user_callback_slots[i].callback(a, b, c, d, fn);
+            }
+        }
+
+        return BOOTROM_ERROR_INVALID_ARG;
+    }
+
     switch (fn) {
     #if PICO_ALLOW_NONSECURE_STDIO
         case SECURE_CALL_stdio_out_chars: {

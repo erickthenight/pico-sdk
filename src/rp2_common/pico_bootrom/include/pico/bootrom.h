@@ -1047,6 +1047,38 @@ int rom_secure_call(uint a, uint b, uint c, uint d, uint func);
 
 int rom_default_callback(uint32_t a, uint32_t b, uint32_t c, uint32_t d, uint32_t fn);
 
+// PICO_CONFIG: PICO_MAX_SECURE_CALL_USER_CALLBACKS, Maximum number of secure call user callbacks, default=4, advanced=true, group=pico_bootrom
+#ifndef PICO_MAX_SECURE_CALL_USER_CALLBACKS
+#define PICO_MAX_SECURE_CALL_USER_CALLBACKS 4
+#endif
+
+/*! Callback function type for user handled rom_secure_call
+ *  \ingroup pico_bootrom
+ */
+typedef int (*rom_secure_call_callback_t)(uint32_t a, uint32_t b, uint32_t c, uint32_t d, uint32_t fn);
+
+/*!
+ * \brief Add user ROM callback function
+ * \ingroup pico_bootrom
+ * 
+ * Add a user callback for rom_secure_call called if using a function code starting with `0b1xxx`,
+ * which is a "unique" or "private" function as specified by the rom_secure_call() documentation.
+ * 
+ * \param callback pointer to the callback function
+ * \param fn_mask first 16 bits of fn codes this callback handles
+ */
+int rom_secure_call_add_user_callback(rom_secure_call_callback_t callback, uint16_t fn_mask);
+
+/*!
+ * \brief Remove user ROM callback function
+ * \ingroup pico_bootrom
+ * 
+ * Remove a user callback for rom_secure_call which was previously added with rom_secure_call_add_user_callback()
+ * 
+ * \param callback pointer to the callback function
+ */
+void rom_secure_call_remove_user_callback(rom_secure_call_callback_t callback);
+
 // PICO_CONFIG: PICO_ALLOW_NONSECURE_STDIO, Allow non-secure to use stdio, type=bool, default=0, group=pico_bootrom
 #ifndef PICO_ALLOW_NONSECURE_STDIO
 #define PICO_ALLOW_NONSECURE_STDIO 0
