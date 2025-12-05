@@ -50,9 +50,9 @@ void secure_sau_set_enabled(bool enabled) {
     __dmb();
 
     if (enabled)
-        hw_set_bits(&sau_hw->ctrl, M33_SAU_CTRL_ENABLE_BITS);
+        sau_hw->ctrl |= M33_SAU_CTRL_ENABLE_BITS;
     else
-        hw_clear_bits(&sau_hw->ctrl, M33_SAU_CTRL_ENABLE_BITS);
+        sau_hw->ctrl &= ~M33_SAU_CTRL_ENABLE_BITS;
 
     __dsb();
     __isb();
