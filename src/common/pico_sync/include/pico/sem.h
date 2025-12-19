@@ -8,6 +8,7 @@
 #define _PICO_SEM_H
 
 #include "pico/lock_core.h"
+#include <stdint.h>
 
 /** \file sem.h
  *  \defgroup sem sem
